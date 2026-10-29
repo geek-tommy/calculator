@@ -12,6 +12,8 @@ args = parser.parse_args()
 app = args.app.resolve(strict=True)
 with (app / "Contents/Info.plist").open("rb") as stream:
     info = plistlib.load(stream)
+if info.get("CFBundleIdentifier") != "local.community.unocalculator.arm64":
+    raise SystemExit("Community build must use its own bundle identifier")
 executable = app / "Contents/MacOS" / info["CFBundleExecutable"]
 if not executable.is_file():
     raise SystemExit(f"Missing main executable: {executable}")

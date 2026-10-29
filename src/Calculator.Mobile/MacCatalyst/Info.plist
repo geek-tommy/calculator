@@ -9,7 +9,7 @@
 		<key>CFBundleDisplayName</key>
 		<string>unocalc</string>
 		<key>CFBundleIdentifier</key>
-		<string>uno.platform.calculator</string>
+		<string>local.community.unocalculator.arm64</string>
 		<key>CFBundleShortVersionString</key>
 		<string>1.0</string>
 		<key>CFBundleVersion</key>
