@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Check shipped Mach-O files; optionally check process startup on an ARM Mac."""
 import argparse
+import os
 import plistlib
 import subprocess
+import tempfile
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -19,6 +21,7 @@ if not executable.is_file():
     raise SystemExit(f"Missing main executable: {executable}")
 print(f"Bundle identifier: {info.get('CFBundleIdentifier')}")
 print(f"Minimum macOS: {info.get('LSMinimumSystemVersion', 'see Info.plist')}")
+print(f"App version: {info.get('CFBundleShortVersionString')}")
 checked = 0
 for path in app.rglob("*"):
     if not path.is_file() or path.is_symlink():
@@ -37,17 +40,24 @@ print(f"Architecture check passed: {checked} Mach-O binaries, all arm64.")
 if args.launch:
     if subprocess.check_output(["uname", "-m"], text=True).strip() != "arm64":
         raise SystemExit("Startup check requires an ARM Mac")
-    with subprocess.Popen([str(executable)], cwd=app.parent) as process:
-        try:
-            result = process.wait(timeout=12)
-        except subprocess.TimeoutExpired:
-            process.terminate()
+    with tempfile.TemporaryDirectory(prefix="unocalc-localization-") as proof_dir:
+        proof = Path(proof_dir) / "loaded-language.txt"
+        environment = os.environ | {"UNO_CALCULATOR_LOCALIZATION_PROOF": str(proof)}
+        with subprocess.Popen([str(executable)], cwd=app.parent, env=environment) as process:
             try:
-                process.wait(timeout=5)
+                result = process.wait(timeout=12)
             except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            print("Startup check passed: process remained alive for 12 seconds.")
-            print("Calculator results and UI still require manual testing.")
-        else:
-            raise SystemExit(f"App exited during startup with code {result}")
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                print("Startup check passed: process remained alive for 12 seconds.")
+                actual = proof.read_text(encoding="utf-8") if proof.exists() else "missing localization proof"
+                if actual != "zh-Hans|标准|科学|程序员":
+                    raise SystemExit(f"Simplified Chinese resource check failed: {actual}")
+                print(f"Simplified Chinese resource check passed: {actual}")
+                print("Calculator results and UI still require manual testing.")
+            else:
+                raise SystemExit(f"App exited during startup with code {result}")
