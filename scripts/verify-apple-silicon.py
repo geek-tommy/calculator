@@ -43,9 +43,11 @@ if args.launch:
     with tempfile.TemporaryDirectory(prefix="unocalc-localization-") as proof_dir:
         proof = Path(proof_dir) / "loaded-language.txt"
         interaction_proof = Path(proof_dir) / "interaction.txt"
+        navigation_proof = Path(proof_dir) / "navigation.txt"
         environment = os.environ | {
             "UNO_CALCULATOR_LOCALIZATION_PROOF": str(proof),
             "UNO_CALCULATOR_INTERACTION_PROOF": str(interaction_proof),
+            "UNO_CALCULATOR_NAVIGATION_PROOF": str(navigation_proof),
         }
         with subprocess.Popen([str(executable)], cwd=app.parent, env=environment) as process:
             try:
@@ -66,6 +68,10 @@ if args.launch:
                 if interaction != "PASS: pressed and hover states return to Normal":
                     raise SystemExit(f"Interaction state check failed: {interaction}")
                 print(f"Interaction state check passed: {interaction}")
+                navigation = navigation_proof.read_text(encoding="utf-8") if navigation_proof.exists() else "FAIL: missing navigation proof"
+                print(navigation)
+                if "FAIL:" in navigation or navigation.count("PASS:") != 14:
+                    raise SystemExit("Navigation checks failed")
                 print("Calculator results and UI still require manual testing.")
             else:
                 raise SystemExit(f"App exited during startup with code {result}")

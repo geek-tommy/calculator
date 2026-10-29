@@ -261,6 +261,7 @@ namespace CalculatorApp
 #if COMMUNITY_MACCATALYST
 			MacCatalystInteractionFeedback.AttachTree(this);
 			MacCatalystInteractionFeedback.VerifyOnStartup(this);
+            VerifyNavigationOnStartup();
 #endif
 		}
 
@@ -572,6 +573,34 @@ namespace CalculatorApp
             NarratorAnnouncement announcement = CalculatorAnnouncement.GetCategoryNameChangedAnnouncement(categoryName);
             //NarratorNotifier.Announce(announcement);
         }
+
+#if COMMUNITY_MACCATALYST
+        void VerifyNavigationOnStartup()
+        {
+            string proof = Environment.GetEnvironmentVariable("UNO_CALCULATOR_NAVIGATION_PROOF");
+            if (string.IsNullOrEmpty(proof)) return;
+            _ = Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            {
+                var results = new List<string>();
+                foreach (var mode in new[] { ViewMode.Volume, ViewMode.Length, ViewMode.Weight,
+                    ViewMode.Temperature, ViewMode.Energy, ViewMode.Area, ViewMode.Speed,
+                    ViewMode.Time, ViewMode.Power, ViewMode.Data, ViewMode.Pressure,
+                    ViewMode.Angle, ViewMode.Currency, ViewMode.Standard })
+                {
+                    try
+                    {
+                        Model.Mode = mode;
+                        if (NavCategory.IsConverterViewMode(mode) &&
+                            (m_converter == null || m_converter.Visibility != Visibility.Visible))
+                            throw new InvalidOperationException("Converter not visible");
+                        results.Add("PASS: " + mode);
+                    }
+                    catch (Exception error) { results.Add("FAIL: " + mode + " " + error); }
+                }
+                File.WriteAllLines(proof, results);
+            });
+        }
+#endif
 
         void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs e)
         {
