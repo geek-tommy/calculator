@@ -180,6 +180,7 @@
 				<EnableCodeSigning>true</EnableCodeSigning>
 				<CodesignKey>-</CodesignKey>
 				<CodesignRequireProvisioningProfile>false</CodesignRequireProvisioningProfile>
+				<CodesignEntitlements>MacCatalyst/Community.entitlements</CodesignEntitlements>
 				<UseHardenedRuntime>false</UseHardenedRuntime>
 			</PropertyGroup>
 			<ItemGroup>

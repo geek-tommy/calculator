@@ -15,12 +15,14 @@ with (app / "Contents/Info.plist").open("rb") as stream:
 executable = app / "Contents/MacOS" / info["CFBundleExecutable"]
 if not executable.is_file():
     raise SystemExit(f"Missing main executable: {executable}")
+print(f"Bundle identifier: {info.get('CFBundleIdentifier')}")
+print(f"Minimum macOS: {info.get('LSMinimumSystemVersion', 'see Info.plist')}")
 checked = 0
 for path in app.rglob("*"):
     if not path.is_file() or path.is_symlink():
         continue
-    description = subprocess.check_output(["file", "-b", str(path)], text=True)
-    if "Mach-O" not in description:
+    description = subprocess.check_output(["file", "-b", str(path)])
+    if b"Mach-O" not in description:
         continue
     architectures = subprocess.check_output(["lipo", "-archs", str(path)], text=True).split()
     if architectures != ["arm64"]:
