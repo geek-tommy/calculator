@@ -174,7 +174,7 @@
 			<!-- Personal test build: no upstream certificates or provisioning profiles. -->
 			<PropertyGroup Condition="'$(CommunityBuild)'=='true'">
 				<DefaultLanguage>zh-Hans</DefaultLanguage>
-				<DefineConstants>$(DefineConstants);COMMUNITY_SIMPLIFIED_CHINESE</DefineConstants>
+				<DefineConstants>$(DefineConstants);COMMUNITY_SIMPLIFIED_CHINESE;COMMUNITY_MACCATALYST</DefineConstants>
 				<ApplicationTitle>Uno Calculator ARM</ApplicationTitle>
 				<ApplicationId>local.community.unocalculator.arm64</ApplicationId>
 				<CreatePackage>false</CreatePackage>

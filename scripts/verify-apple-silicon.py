@@ -42,7 +42,11 @@ if args.launch:
         raise SystemExit("Startup check requires an ARM Mac")
     with tempfile.TemporaryDirectory(prefix="unocalc-localization-") as proof_dir:
         proof = Path(proof_dir) / "loaded-language.txt"
-        environment = os.environ | {"UNO_CALCULATOR_LOCALIZATION_PROOF": str(proof)}
+        interaction_proof = Path(proof_dir) / "interaction.txt"
+        environment = os.environ | {
+            "UNO_CALCULATOR_LOCALIZATION_PROOF": str(proof),
+            "UNO_CALCULATOR_INTERACTION_PROOF": str(interaction_proof),
+        }
         with subprocess.Popen([str(executable)], cwd=app.parent, env=environment) as process:
             try:
                 result = process.wait(timeout=12)
@@ -58,6 +62,10 @@ if args.launch:
                 if actual != "zh-Hans|标准|科学|程序员":
                     raise SystemExit(f"Simplified Chinese resource check failed: {actual}")
                 print(f"Simplified Chinese resource check passed: {actual}")
+                interaction = interaction_proof.read_text(encoding="utf-8") if interaction_proof.exists() else "missing interaction proof"
+                if interaction != "PASS: pressed and hover states return to Normal":
+                    raise SystemExit(f"Interaction state check failed: {interaction}")
+                print(f"Interaction state check passed: {interaction}")
                 print("Calculator results and UI still require manual testing.")
             else:
                 raise SystemExit(f"App exited during startup with code {result}")

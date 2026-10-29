@@ -258,6 +258,10 @@ namespace CalculatorApp
         void OnPageLoaded(object sender, RoutedEventArgs args)
 		{
 			Initialize();
+#if COMMUNITY_MACCATALYST
+			MacCatalystInteractionFeedback.AttachTree(this);
+			MacCatalystInteractionFeedback.VerifyOnStartup(this);
+#endif
 		}
 
 		bool initialized = false;
@@ -492,6 +496,9 @@ namespace CalculatorApp
         NavigationViewItem CreateNavViewItemFromCategory(NavCategory category)
         {
             var item = new NavigationViewItem();
+#if COMMUNITY_MACCATALYST
+            MacCatalystInteractionFeedback.Attach(item);
+#endif
             item.DataContext = category;
 
             var icon = new FontIcon();
