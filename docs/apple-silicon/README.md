@@ -4,7 +4,12 @@
 基础提交：c32d9b20ee49a394370afd5e73cd7d2f48507cc8
 用户提供的 LuisFX/Uno.Calculator 是该仓库的旧分支。
 
-状态：源码修改及构建流程已准备，尚未执行 macOS 编译和功能验收。
+状态：2026-10-29 已在 Apple Silicon macOS 构建环境完成 Release 编译、全部 Mach-O 的 ARM64 架构检查、独立 bundle ID 检查、签名完整性校验及 12 秒进程启动检查，并生成 DMG 和应用 ZIP。计算结果和界面操作仍待用户手工验收。
+
+验证提交：36c73d02e10246bdcefeb5942697808a246ef29d
+构建记录：https://github.com/geek-tommy/calculator/actions/runs/40831203367
+实际生成的应用最低系统要求：macOS 12.0。
+签名：ad-hoc；未做 Apple Developer ID 公证。
 
 ## 改动
 
