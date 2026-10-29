@@ -44,9 +44,7 @@ namespace CalculatorApp
 
 #if COMMUNITY_SIMPLIFIED_CHINESE
 			// Select the script explicitly before any XAML or resource strings are loaded.
-			Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "zh-CN";
-            // Uno also applies this override to CurrentCulture. A language-only
-            // culture such as zh-Hans has no region and breaks converter startup.
+			Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "zh-Hans";
 			var uiCulture = System.Globalization.CultureInfo.GetCultureInfo("zh-Hans");
 			System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
 			System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = uiCulture;

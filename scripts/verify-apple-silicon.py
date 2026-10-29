@@ -60,6 +60,8 @@ if args.launch:
                     process.kill()
                     process.wait()
                 print("Startup check passed: process remained alive for 12 seconds.")
+                navigation = navigation_proof.read_text(encoding="utf-8") if navigation_proof.exists() else "FAIL: missing navigation proof"
+                print(navigation)
                 actual = proof.read_text(encoding="utf-8") if proof.exists() else "missing localization proof"
                 if actual != "zh-Hans|标准|科学|程序员":
                     raise SystemExit(f"Simplified Chinese resource check failed: {actual}")
@@ -68,8 +70,6 @@ if args.launch:
                 if interaction != "PASS: pressed and hover states return to Normal":
                     raise SystemExit(f"Interaction state check failed: {interaction}")
                 print(f"Interaction state check passed: {interaction}")
-                navigation = navigation_proof.read_text(encoding="utf-8") if navigation_proof.exists() else "FAIL: missing navigation proof"
-                print(navigation)
                 if "FAIL:" in navigation or navigation.count("PASS:") != 14:
                     raise SystemExit("Navigation checks failed")
                 print("Calculator results and UI still require manual testing.")
