@@ -416,6 +416,9 @@ namespace CalculatorApp
 
         void OnNavPaneOpened(NavigationView sender, object args)
         {
+#if COMMUNITY_MACCATALYST
+            QueueNavigationReset();
+#endif
             // UNO TODO
             // KeyboardShortcutManager.HonorShortcuts(false);
             // TraceLogger.GetInstance().LogNavBarOpened();
@@ -455,11 +458,19 @@ namespace CalculatorApp
 
         void OnNavSelectionChanged(object sender, NavigationViewSelectionChangedEventArgs e)
         {
+#if COMMUNITY_MACCATALYST
+            if (synchronizingNavigation) return;
+            var item = e.SelectedItemContainer as NavigationViewItem ?? e.SelectedItem as NavigationViewItem;
+#else
             var item = (NavigationViewItem)(e.SelectedItemContainer);
+#endif
             if (item != null)
             {
                 var selectedItem = (NavCategory)(item.DataContext);
                 Model.Mode = selectedItem.Mode;
+#if COMMUNITY_MACCATALYST
+                QueueNavigationReset();
+#endif
             }
         }
 
@@ -498,7 +509,11 @@ namespace CalculatorApp
         {
             var item = new NavigationViewItem();
 #if COMMUNITY_MACCATALYST
-            MacCatalystInteractionFeedback.Attach(item);
+            var released = new PointerEventHandler((sender, args) => QueueNavigationReset());
+            item.AddHandler(UIElement.PointerReleasedEvent, released, true);
+            item.AddHandler(UIElement.PointerCanceledEvent, released, true);
+            item.PointerExited += released;
+            item.LostFocus += (sender, args) => QueueNavigationReset();
 #endif
             item.DataContext = category;
 
@@ -575,6 +590,41 @@ namespace CalculatorApp
         }
 
 #if COMMUNITY_MACCATALYST
+        bool synchronizingNavigation;
+
+        void QueueNavigationReset()
+        {
+            _ = Dispatcher.RunAsync(CoreDispatcherPriority.Low, SynchronizeNavigation);
+        }
+
+        void SynchronizeNavigation()
+        {
+            if (synchronizingNavigation) return;
+            synchronizingNavigation = true;
+            try
+            {
+                var items = ((IEnumerable<object>)NavView.MenuItemsSource).OfType<NavigationViewItem>().ToList();
+                var selected = items.FirstOrDefault(item => (item.DataContext as NavCategory)?.Mode == Model.Mode);
+                NavView.SelectedItem = selected;
+                foreach (var item in items)
+                    MacCatalystInteractionFeedback.ResetNavigation(item, item == selected);
+            }
+            finally { synchronizingNavigation = false; }
+        }
+
+        void VerifyConversion(UnitConverterUnits from, UnitConverterUnits to, double expected)
+        {
+            var vm = Model.ConverterViewModel;
+            vm.Unit1 = vm.Units.First(unit => unit.GetModelUnit().id == (int)from);
+            vm.Unit2 = vm.Units.First(unit => unit.GetModelUnit().id == (int)to);
+            vm.UnitChanged.Execute(null);
+            vm.OnKeyPress(VirtualKey.Escape);
+            vm.OnKeyPress(VirtualKey.Number1);
+            if (!double.TryParse(vm.Value2, System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture, out double actual) || Math.Abs(actual - expected) > 0.00001)
+                throw new InvalidOperationException("Conversion mismatch: " + vm.Value2 + " expected " + expected);
+        }
+
         void VerifyNavigationOnStartup()
         {
             string proof = Environment.GetEnvironmentVariable("UNO_CALCULATOR_NAVIGATION_PROOF");
@@ -589,14 +639,31 @@ namespace CalculatorApp
                 {
                     try
                     {
-                        Model.Mode = mode;
+                        NavView.IsPaneOpen = true;
+                        UpdateLayout();
+                        var menuItems = ((IEnumerable<object>)NavView.MenuItemsSource).OfType<NavigationViewItem>().ToList();
+                        NavView.SelectedItem = menuItems.First(item => ((NavCategory)item.DataContext).Mode == mode);
+                        if (Model.Mode != mode) throw new InvalidOperationException("Menu did not navigate");
+                        SynchronizeNavigation();
+                        if (menuItems.Count(item => item.IsSelected) != 1)
+                            throw new InvalidOperationException("Multiple menu selections");
                         if (NavCategory.IsConverterViewMode(mode) &&
                             (m_converter == null || m_converter.Visibility != Visibility.Visible))
                             throw new InvalidOperationException("Converter not visible");
+                        if (NavCategory.IsConverterViewMode(mode) && mode != ViewMode.Currency &&
+                            (Model.ConverterViewModel.Units.Count < 2 || Model.ConverterViewModel.Unit1 == null || Model.ConverterViewModel.Unit2 == null))
+                            throw new InvalidOperationException("Converter units not loaded");
+                        if (mode == ViewMode.Length)
+                            VerifyConversion(UnitConverterUnits.Length_Meter, UnitConverterUnits.Length_Centimeter, 100);
+                        if (mode == ViewMode.Volume)
+                            VerifyConversion(UnitConverterUnits.Volume_Liter, UnitConverterUnits.Volume_Milliliter, 1000);
+                        if (mode == ViewMode.Temperature)
+                            VerifyConversion(UnitConverterUnits.Temperature_DegreesCelsius, UnitConverterUnits.Temperature_DegreesFahrenheit, 33.8);
                         results.Add("PASS: " + mode);
                     }
                     catch (Exception error) { results.Add("FAIL: " + mode + " " + error); }
                 }
+                NavView.IsPaneOpen = false;
                 File.WriteAllLines(proof, results);
             });
         }
@@ -604,6 +671,14 @@ namespace CalculatorApp
 
         void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs e)
         {
+#if COMMUNITY_MACCATALYST
+            var item = e.InvokedItemContainer as NavigationViewItem;
+            if (item == null)
+                item = ((IEnumerable<object>)NavView.MenuItemsSource).OfType<NavigationViewItem>()
+                    .FirstOrDefault(candidate => Equals(candidate.Content, e.InvokedItem));
+            if (item?.DataContext is NavCategory category) Model.Mode = category.Mode;
+            QueueNavigationReset();
+#endif
             NavView.IsPaneOpen = false;
         }
     }

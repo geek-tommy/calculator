@@ -37,7 +37,7 @@ namespace CalculatorApp.Common
 
         public static void AttachTree(DependencyObject root)
         {
-            if (root is Button || root is NavigationViewItem) Attach((Control)root);
+            if (root is Button) Attach((Control)root);
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
                 AttachTree(VisualTreeHelper.GetChild(root, i));
         }
@@ -45,6 +45,25 @@ namespace CalculatorApp.Common
         private static void QueueReset(Control control)
         {
             _ = control.Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => Reset(control));
+        }
+
+        public static void ResetNavigation(NavigationViewItem item, bool selected)
+        {
+            item.IsSelected = selected;
+            string state = selected ? "Selected" : "Normal";
+            VisualStateManager.GoToState(item, state, false);
+            ResetPresenters(item, state);
+        }
+
+        private static void ResetPresenters(DependencyObject root, string state)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+            {
+                var child = VisualTreeHelper.GetChild(root, i);
+                if (child is NavigationViewItemPresenter presenter)
+                    VisualStateManager.GoToState(presenter, state, false);
+                ResetPresenters(child, state);
+            }
         }
 
         private static void Reset(Control control)
