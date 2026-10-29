@@ -27,6 +27,6 @@ for arch in "$@"; do
             "$source_dir"/*.cpp
         xcrun --sdk macosx libtool -static ./*.o -o "$output_dir/libCalcManager.a"
     )
-    lipo -verify_arch "$arch" "$output_dir/libCalcManager.a"
+    lipo "$output_dir/libCalcManager.a" -verify_arch "$arch"
     echo "Built CalcManager ($arch)"
 done

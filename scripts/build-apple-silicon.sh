@@ -45,6 +45,6 @@ cp docs/apple-silicon/TESTING.md "$stage/Testing.txt"
 hdiutil create -volname "Uno Calculator ARM" -srcfolder "$stage" \
     -ov -format UDZO artifacts/Uno-Calculator-arm64.dmg
 ditto -c -k --sequesterRsrc --keepParent "$app" artifacts/Uno-Calculator-arm64.zip
-shasum -a 256 artifacts/Uno-Calculator-arm64.dmg artifacts/Uno-Calculator-arm64.zip \
+(cd artifacts && shasum -a 256 Uno-Calculator-arm64.dmg Uno-Calculator-arm64.zip) \
     > artifacts/SHA256SUMS.txt
 echo "ARM64 packages created under artifacts/. Ad-hoc signature; not notarized."
