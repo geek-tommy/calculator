@@ -14,7 +14,7 @@ namespace CalculationManager
 {
 	public static partial class NativeDispatch
 	{
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		private const string DllPath = "__Internal"; // https://docs.microsoft.com/en-us/xamarin/ios/platform/native-interop
 #else
 		private const string DllPath = "CalcManager";
@@ -161,7 +161,7 @@ namespace CalculationManager
 		public static SetExpressionDisplayCallbackFunc _setExpressionDisplayCallback = SetExpressionDisplayCallback;
 		public static SetMemorizedNumbersCallbackFunc _setMemorizedNumbersCallback = SetMemorizedNumbersCallback;
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(MaxDigitsReachedCallbackFunc))]
 #endif
 #if __WASM__
@@ -175,7 +175,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.MaxDigitsReachedCallback");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(MemoryItemChangedCallbackFunc))]
 #endif
 #if __WASM__
@@ -189,7 +189,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.MemoryItemChangedCallback({indexOfMemory})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(OnHistoryItemAddedCallbackFunc))]
 #endif
 #if __WASM__
@@ -203,7 +203,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.OnHistoryItemAddedCallback({addedItemIndex})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(OnNoRightParenAddedCallbackFunc))]
 #endif
 #if __WASM__
@@ -217,7 +217,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.OnNoRightParenAddedCallback");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(SetExpressionDisplayCallbackFunc))]
 #endif
 #if __WASM__
@@ -240,7 +240,7 @@ namespace CalculationManager
 
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(SetMemorizedNumbersCallbackFunc))]
 #endif
 #if __WASM__
@@ -262,7 +262,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.SetMemorizedNumbersCallback({string.Join(";", numbers)})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(SetParenthesisNumberCallbackFunc))]
 #endif
 #if __WASM__
@@ -276,7 +276,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.SetParenthesisNumberCallback({parenthesisCount})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(BinaryOperatorReceivedFunc))]
 #endif
 
@@ -291,7 +291,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.BinaryOperatorReceivedCallback");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(SetPrimaryDisplayCallbackFunc))]
 #endif
 #if __WASM__
@@ -307,7 +307,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.SetPrimaryDisplayCallback({displayStringValue}, {isError})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(SetIsInErrorCallbackFunc))]
 #endif
 #if __WASM__
@@ -321,7 +321,7 @@ namespace CalculationManager
 			DebugTrace($"CalculatorManager.SetIsInErrorCallback({isError})");
 		}
 
-#if __IOS__ || __MACOS__
+#if __IOS__ || __MACOS__ || MACCATALYST || __MACCATALYST__
 		[ObjCRuntime.MonoPInvokeCallback(typeof(GetCEngineStringFunc))]
 #endif
 #if __WASM__
