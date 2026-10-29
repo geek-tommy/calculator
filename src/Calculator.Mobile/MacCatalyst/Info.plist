@@ -9,11 +9,17 @@
 		<key>CFBundleDisplayName</key>
 		<string>unocalc</string>
 		<key>CFBundleIdentifier</key>
-		<string>uno.platform.calculator</string>
+		<string>local.community.unocalculator.arm64</string>
 		<key>CFBundleShortVersionString</key>
-		<string>1.0</string>
+		<string>1.0.3</string>
 		<key>CFBundleVersion</key>
-		<string>1.0</string>
+		<string>4</string>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>zh-Hans</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>zh-Hans</string>
+		</array>
 		<key>UIDeviceFamily</key>
 		<array>
 			<integer>2</integer>

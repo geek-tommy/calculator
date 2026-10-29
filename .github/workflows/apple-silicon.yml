@@ -1,0 +1,52 @@
+name: Build Apple Silicon calculator
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [community-arm64]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'docs/apple-silicon/**'
+      - '.github/workflows/apple-silicon.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 16.4 and confirm ARM host
+        run: |
+          test "$(uname -m)" = arm64
+          test -d /Applications/Xcode_16.4.app
+          sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
+          xcodebuild -version
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.302'
+      - name: Install matching Mac Catalyst workload
+        run: dotnet workload install maccatalyst --version 9.0.302.0
+      - name: Build, verify architecture and package
+        run: bash scripts/build-apple-silicon.sh
+      - name: Save application packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: Uno-Calculator-arm64
+          path: |
+            artifacts/*.dmg
+            artifacts/*.zip
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Save build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Uno-Calculator-build-logs
+          path: artifacts/logs/
+          if-no-files-found: ignore
+          retention-days: 14

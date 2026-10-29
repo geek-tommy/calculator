@@ -20,6 +20,9 @@ namespace CalculatorApp.Controls
 			Binding commandBinding = new Binding();
 			commandBinding.Path = new PropertyPath("ButtonPressed");
 			this.SetBinding(Button.CommandProperty, commandBinding);
+#if COMMUNITY_MACCATALYST
+			MacCatalystInteractionFeedback.Attach(this);
+#endif
 		}
 
 		// ButtonId
@@ -95,7 +98,7 @@ namespace CalculatorApp.Controls
 		public Brush PressForeground
 		{
 			get { return (Brush)GetValue(PressForegroundProperty); }
-			set { SetValue(PressBackgroundProperty, value); }
+			set { SetValue(PressForegroundProperty, value); }
 		}
 
 		public static readonly DependencyProperty PressForegroundProperty =

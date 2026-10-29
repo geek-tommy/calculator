@@ -42,11 +42,32 @@ namespace CalculatorApp
 		{
 			InitializeLogging();
 
+#if COMMUNITY_SIMPLIFIED_CHINESE
+			// Select the script explicitly before any XAML or resource strings are loaded.
+			Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "zh-Hans";
+			var uiCulture = System.Globalization.CultureInfo.GetCultureInfo("zh-Hans");
+			System.Globalization.CultureInfo.CurrentUICulture = uiCulture;
+			System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = uiCulture;
+#endif
+
 #if HAS_UNO
 			global::Uno.UI.FeatureConfiguration.Font.DefaultTextFontFamily = "ms-appx:///Uno.Fonts.OpenSans/Fonts/OpenSans.ttf";
 #endif
 
 			this.InitializeComponent();
+
+#if COMMUNITY_SIMPLIFIED_CHINESE
+			// The CI startup check verifies strings from the actual packaged resources.
+			var localizationProof = Environment.GetEnvironmentVariable("UNO_CALCULATOR_LOCALIZATION_PROOF");
+			if (!string.IsNullOrEmpty(localizationProof))
+			{
+				var strings = Windows.ApplicationModel.Resources.ResourceLoader.GetForViewIndependentUse();
+				File.WriteAllText(localizationProof, string.Join("|", "zh-Hans",
+					strings.GetString("StandardModeText"),
+					strings.GetString("ScientificModeText"),
+					strings.GetString("ProgrammerModeText")));
+			}
+#endif
 			this.Suspending += OnSuspending;
 
 #if !__ANDROID__
