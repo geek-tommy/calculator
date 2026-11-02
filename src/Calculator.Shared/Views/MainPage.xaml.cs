@@ -524,7 +524,11 @@ namespace CalculatorApp
 
             item.Content = category.Name;
             item.AccessKey = category.AccessKey;
+#if COMMUNITY_MACCATALYST
+            item.Style = (Style)Resources["CommunityNavViewItemStyle"];
+#else
             item.Style = (Windows.UI.Xaml.Style)(Resources["NavViewItemStyle"]);
+#endif
 
             AutomationProperties.SetName(item, category.AutomationName);
             AutomationProperties.SetAutomationId(item, category.AutomationId);
