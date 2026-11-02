@@ -1,10 +1,10 @@
-﻿	<Project Sdk="Microsoft.NET.Sdk">
+	<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0-macos</TargetFrameworks>
 		<SingleProject>true</SingleProject>
 		<OutputType>Exe</OutputType>
 		<RuntimeIdentifier Condition="'$(TargetFramework)' == 'net9.0-ios'">iossimulator-x64</RuntimeIdentifier>
-		<RuntimeIdentifier Condition="'$(TargetFramework)' == 'net9.0-maccatalyst'">maccatalyst-x64</RuntimeIdentifier>
+		<RuntimeIdentifier Condition="'$(TargetFramework)' == 'net9.0-maccatalyst' and '$(RuntimeIdentifier)' == ''">maccatalyst-x64</RuntimeIdentifier>
 		<RuntimeIdentifier Condition="'$(TargetFramework)' == 'net9.0-macos'">osx-x64</RuntimeIdentifier>
 		<!-- Debugger workaround https://github.com/dotnet/maui-samples/blob/8aa6b8780b12e97b157514c3bdc54bb4a13001cd/HelloMacCatalyst/HelloMacCatalyst.csproj#L7 -->
 		<!-- <MtouchExtraArgs Condition="'$(TargetFramework)' == 'net9.0-maccatalyst'">$(MtouchExtraArgs) -setenv:MONO_THREADS_SUSPEND=preemptive</MtouchExtraArgs> -->
@@ -135,11 +135,13 @@
 			<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'maccatalyst-x64' ">
 				<NativeReference Include="MacCatalyst/NativeReferences/x86_64/libCalcManager.a">
 					<Kind>Static</Kind>
+					<ForceLoad>true</ForceLoad>
 				</NativeReference>
 			</ItemGroup>
 			<ItemGroup Condition=" '$(RuntimeIdentifier)' == 'maccatalyst-arm64' ">
 				<NativeReference Include="MacCatalyst/NativeReferences/arm64/libCalcManager.a">
 					<Kind>Static</Kind>
+					<ForceLoad>true</ForceLoad>
 				</NativeReference>
 			</ItemGroup>
 			<PropertyGroup>
@@ -152,7 +154,7 @@
 				<!-- https://github.com/xamarin/xamarin-macios/issues/14812 -->
 				<MtouchExtraArgs>$(MtouchExtraArgs) --marshal-objectivec-exceptions:disable</MtouchExtraArgs>
 			</PropertyGroup>
-			<PropertyGroup Condition="'$(Configuration)'=='Release'">
+			<PropertyGroup Condition="'$(Configuration)'=='Release' and '$(CommunityBuild)'!='true'">
 				<MtouchUseLlvm>true</MtouchUseLlvm>
 				<CodeSigningKey>Apple Distribution: Uno Platform Inc. (PD74CHS9Z5)</CodeSigningKey>
 				<PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
@@ -168,6 +170,20 @@
 				<!-- https://github.com/xamarin/xamarin-macios/issues/14686 -->
 				<_LibMonoLinkMode>Static</_LibMonoLinkMode>
 				<_LibXamarinLinkMode>Static</_LibXamarinLinkMode>
+			</PropertyGroup>
+			<!-- Personal test build: no upstream certificates or provisioning profiles. -->
+			<PropertyGroup Condition="'$(CommunityBuild)'=='true'">
+				<DefaultLanguage>zh-Hans</DefaultLanguage>
+				<DefineConstants>$(DefineConstants);COMMUNITY_SIMPLIFIED_CHINESE;COMMUNITY_MACCATALYST</DefineConstants>
+				<ApplicationTitle>Uno Calculator ARM</ApplicationTitle>
+				<ApplicationId>local.community.unocalculator.arm64</ApplicationId>
+				<CreatePackage>false</CreatePackage>
+				<EnablePackageSigning>false</EnablePackageSigning>
+				<EnableCodeSigning>true</EnableCodeSigning>
+				<CodesignKey>-</CodesignKey>
+				<CodesignRequireProvisioningProfile>false</CodesignRequireProvisioningProfile>
+				<CodesignEntitlements>MacCatalyst/Community.entitlements</CodesignEntitlements>
+				<UseHardenedRuntime>false</UseHardenedRuntime>
 			</PropertyGroup>
 			<ItemGroup>
 				<TrimmerRootDescriptor Include="MacCatalyst/linker.xml" />

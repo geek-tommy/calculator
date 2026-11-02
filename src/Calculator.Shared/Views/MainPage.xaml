@@ -62,6 +62,60 @@
 			<Setter Property="KeyTipPlacementMode"
 					Value="Right" />
 		</Style>
+        <!-- Explicit Catalyst feedback avoids the legacy nested native presenter. -->
+        <Style x:Key="CommunityNavViewItemStyle" TargetType="NavigationViewItem">
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="NavigationViewItem">
+                        <Grid x:Name="FeedbackRoot" Background="Transparent" MinHeight="40">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters><Setter Target="FeedbackRoot.Background" Value="{ThemeResource SystemControlHighlightListLowBrush}" /></VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters><Setter Target="FeedbackRoot.Background" Value="{ThemeResource SystemControlHighlightListMediumBrush}" /></VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Target="FeedbackRoot.Background" Value="{ThemeResource SystemControlHighlightListLowBrush}" />
+                                            <Setter Target="SelectionIndicator.Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOverSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="FeedbackRoot.Background" Value="{ThemeResource SystemControlHighlightListMediumBrush}" />
+                                            <Setter Target="SelectionIndicator.Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PressedSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="FeedbackRoot.Background" Value="{ThemeResource SystemControlHighlightListMediumBrush}" />
+                                            <Setter Target="SelectionIndicator.Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="FocusStates">
+                                    <VisualState x:Name="Unfocused" />
+                                    <VisualState x:Name="PointerFocused" />
+                                    <VisualState x:Name="Focused">
+                                        <VisualState.Setters><Setter Target="KeyboardFocusBorder.Opacity" Value="1" /></VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="40" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <ContentPresenter Content="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" VerticalAlignment="Center" Margin="4,0,12,0" />
+                            <Border x:Name="SelectionIndicator" Grid.ColumnSpan="2" Width="2" Height="24" HorizontalAlignment="Left" Background="{ThemeResource SystemControlHighlightAccentBrush}" Opacity="0" />
+                            <Border x:Name="KeyboardFocusBorder" Grid.ColumnSpan="2" BorderThickness="1" BorderBrush="{ThemeResource SystemControlForegroundBaseHighBrush}" Opacity="0" IsHitTestVisible="False" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 	</Page.Resources>
 
 	<Grid toolkit:VisibleBoundsPadding.PaddingMask="All"
