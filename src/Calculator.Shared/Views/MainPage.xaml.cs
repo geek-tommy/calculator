@@ -620,7 +620,10 @@ namespace CalculatorApp
             vm.UnitChanged.Execute(null);
             vm.OnKeyPress(VirtualKey.Escape);
             vm.OnKeyPress(VirtualKey.Number1);
-            if (!double.TryParse(vm.Value2, System.Globalization.NumberStyles.Number,
+            // The display wraps numbers with Unicode bidi formatting marks.
+            string numericValue = new string(vm.Value2.Where(c =>
+                System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.Format).ToArray());
+            if (!double.TryParse(numericValue, System.Globalization.NumberStyles.Number,
                 System.Globalization.CultureInfo.CurrentCulture, out double actual) || Math.Abs(actual - expected) > 0.00001)
                 throw new InvalidOperationException("Conversion mismatch: " + vm.Value2 + " expected " + expected);
         }
@@ -635,7 +638,7 @@ namespace CalculatorApp
                 foreach (var mode in new[] { ViewMode.Volume, ViewMode.Length, ViewMode.Weight,
                     ViewMode.Temperature, ViewMode.Energy, ViewMode.Area, ViewMode.Speed,
                     ViewMode.Time, ViewMode.Power, ViewMode.Data, ViewMode.Pressure,
-                    ViewMode.Angle, ViewMode.Currency, ViewMode.Standard })
+                    ViewMode.Angle, ViewMode.Currency, ViewMode.Standard, ViewMode.Scientific, ViewMode.Programmer, ViewMode.Standard })
                 {
                     try
                     {
@@ -645,6 +648,8 @@ namespace CalculatorApp
                         NavView.SelectedItem = menuItems.First(item => ((NavCategory)item.DataContext).Mode == mode);
                         if (Model.Mode != mode) throw new InvalidOperationException("Menu did not navigate");
                         SynchronizeNavigation();
+                        foreach (var menuItem in menuItems)
+                            MacCatalystInteractionFeedback.VerifyNavigation(menuItem);
                         if (menuItems.Count(item => item.IsSelected) != 1)
                             throw new InvalidOperationException("Multiple menu selections");
                         if (NavCategory.IsConverterViewMode(mode) &&

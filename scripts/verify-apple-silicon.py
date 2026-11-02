@@ -70,7 +70,7 @@ if args.launch:
                 if interaction != "PASS: pressed and hover states return to Normal":
                     raise SystemExit(f"Interaction state check failed: {interaction}")
                 print(f"Interaction state check passed: {interaction}")
-                if "FAIL:" in navigation or navigation.count("PASS:") != 14:
+                if "FAIL:" in navigation or navigation.count("PASS:") != 17:
                     raise SystemExit("Navigation checks failed")
                 print("Calculator results and UI still require manual testing.")
             else:

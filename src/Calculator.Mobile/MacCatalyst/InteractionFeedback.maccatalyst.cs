@@ -66,6 +66,50 @@ namespace CalculatorApp.Common
             }
         }
 
+        public static void VerifyNavigation(NavigationViewItem item)
+        {
+            item.ApplyTemplate();
+            bool selected = item.IsSelected;
+            ResetNavigation(item, selected);
+            var nodes = Descendants(item).ToList();
+            var groups = nodes.OfType<FrameworkElement>()
+                .SelectMany(element => VisualStateManager.GetVisualStateGroups(element))
+                .Where(group => group.Name == "CommonStates").ToList();
+            if (groups.Count == 0) throw new InvalidOperationException("Menu template has no CommonStates");
+            var backgrounds = nodes.Where(node => node is Panel || node is Border)
+                .Select(node => (node, brush: BackgroundOf(node))).ToList();
+            foreach (string state in new[] { "PointerOver", "Pressed" })
+            {
+                VisualStateManager.GoToState(item, state, false);
+                ResetPresenters(item, state);
+                if (!groups.Any(group => group.CurrentState?.Name == state))
+                    throw new InvalidOperationException("Menu did not enter " + state);
+                ResetNavigation(item, selected);
+                if (groups.Any(group => group.CurrentState?.Name != (selected ? "Selected" : "Normal")))
+                    throw new InvalidOperationException("Menu feedback did not reset");
+                foreach (var entry in backgrounds)
+                {
+                    var actual = BackgroundOf(entry.node);
+                    if (entry.brush is SolidColorBrush expected && actual is SolidColorBrush solid)
+                    {
+                        if (expected.Color != solid.Color) throw new InvalidOperationException("Menu background remained changed");
+                    }
+                    else if (!ReferenceEquals(entry.brush, actual))
+                        throw new InvalidOperationException("Menu background brush did not recover");
+                }
+            }
+        }
+
+        private static Brush BackgroundOf(DependencyObject node) =>
+            node is Panel panel ? panel.Background : ((Border)node).Background;
+
+        private static System.Collections.Generic.IEnumerable<DependencyObject> Descendants(DependencyObject root)
+        {
+            yield return root;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+                foreach (var node in Descendants(VisualTreeHelper.GetChild(root, i))) yield return node;
+        }
+
         private static void Reset(Control control)
         {
             if (!control.IsEnabled || (control is ButtonBase button && button.IsPressed)) return;
